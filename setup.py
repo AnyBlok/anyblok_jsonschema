@@ -13,7 +13,7 @@ from anyblok_jsonschema.release import version
 requires = [
     'anyblok',
     'anyblok_marshmallow',
-    'marshmallow_jsonschema',
+    'marshmallow-jsonschema',
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
