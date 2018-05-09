@@ -44,7 +44,7 @@ env:
     - ANYBLOK_DATABASE_USER=postgres
 
 script:
-  - flake8 anyblok
+  - flake8 anyblok_jsonschema
   - nosetests anyblok_jsonschema/tests -v -s --with-coverage --cover-package=anyblok_jsonschema
   
 after_success:
