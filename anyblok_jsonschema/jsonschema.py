@@ -107,3 +107,12 @@ class AnyBlokJSONSchema(JSONSchema):
             })
 
         return data
+
+    def dump(self, schema, *args, **kwargs):
+        try:
+            if isinstance(schema, ModelSchema):
+                schema = schema.schema
+        except AttributeError:
+            pass
+
+        return super(AnyBlokJSONSchema, self).dump(schema, *args, **kwargs)
