@@ -6,7 +6,7 @@
 # v. 2.0. If a copy of the MPL was not distributed with this file,You can
 # obtain one at http://mozilla.org/MPL/2.0/.
 from marshmallow_jsonschema import JSONSchema
-from anyblok_marshmallow import ModelSchema, Nested, Text
+from anyblok_marshmallow import ModelSchema, Nested, Text, PhoneNumber
 from marshmallow.compat import basestring
 from marshmallow.class_registry import get_class
 from marshmallow.decorators import post_dump
@@ -20,6 +20,7 @@ class AnyBlokJSONSchema(JSONSchema):
         mapping.update({
             Nested: '_from_nested_schema',
             Text: '_from_text_schema',
+            PhoneNumber: '_from_tel_schema',
         })
         return mapping
 
@@ -73,6 +74,21 @@ class AnyBlokJSONSchema(JSONSchema):
 
         return schema
 
+    def _apply_common_attribute(self, schema, field):
+        if field.dump_only:
+            schema['readonly'] = True
+
+        if field.default is not missing:
+            schema['default'] = field.default
+
+        metadata = field.metadata.get('metadata', {})
+        metadata.update(field.metadata)
+
+        for md_key, md_val in metadata.items():
+            if md_key == 'metadata':
+                continue
+            schema[md_key] = md_val
+
     def _from_text_schema(self, obj, field):
         json_schema = {
             'title': field.attribute or field.name,
@@ -81,22 +97,19 @@ class AnyBlokJSONSchema(JSONSchema):
                 'type': 'textarea',
             },
         }
-        if field.dump_only:
-            json_schema['readonly'] = True
-
-        if field.default is not missing:
-            json_schema['default'] = field.default
-
-        # NOTE: doubled up to maintain backwards compatibility
-        metadata = field.metadata.get('metadata', {})
-        metadata.update(field.metadata)
-
-        for md_key, md_val in metadata.items():
-            if md_key == 'metadata':
-                continue
-            json_schema[md_key] = md_val
-
+        self._apply_common_attribute(json_schema, field)
         return json_schema
+
+    def _from_tel_schema(self, obj, field):
+        schema = {
+            'title': field.attribute or field.name,
+            'type': 'string',
+            'attrs': {
+                'type': 'tel',
+            },
+        }
+        self._apply_common_attribute(schema, field)
+        return schema
 
     @post_dump(pass_many=False)
     def wrap(self, data):
