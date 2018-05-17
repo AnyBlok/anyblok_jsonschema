@@ -6,7 +6,7 @@
 # v. 2.0. If a copy of the MPL was not distributed with this file,You can
 # obtain one at http://mozilla.org/MPL/2.0/.
 from marshmallow_jsonschema import JSONSchema
-from anyblok_marshmallow import ModelSchema, Nested, Text, PhoneNumber
+from anyblok_marshmallow import ModelSchema, Nested, Text, PhoneNumber, Country
 from marshmallow.compat import basestring
 from marshmallow.class_registry import get_class
 from marshmallow.decorators import post_dump
@@ -21,6 +21,7 @@ class AnyBlokJSONSchema(JSONSchema):
             Nested: '_from_nested_schema',
             Text: '_from_text_schema',
             PhoneNumber: '_from_tel_schema',
+            Country: '_from_country_schema',
         })
         return mapping
 
@@ -110,6 +111,9 @@ class AnyBlokJSONSchema(JSONSchema):
         }
         self._apply_common_attribute(schema, field)
         return schema
+
+    def _from_country_schema(self, obj, field):
+        return self._from_python_type(obj, field, str)
 
     @post_dump(pass_many=False)
     def wrap(self, data):
